@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import Plotly from 'plotly.js-dist-min';
 import moment from 'moment-timezone';
+import TimezoneSelector from './TimezoneSelector';
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
@@ -94,8 +95,7 @@ function App() {
     }
   }, [hasPlot, plotData, timezone]);
 
-  const handleTimezoneChange = (event) => {
-    const newTimezone = event.target.value;
+  const handleTimezoneChange = (newTimezone) => {
     setTimezone(newTimezone);
     if (rawData) {
       const processedData = processData(rawData, newTimezone);
@@ -107,20 +107,7 @@ function App() {
     <div className="App bg-gray-100 min-h-screen p-8">
       <h1 className="text-4xl font-bold text-center text-blue-600 mb-8">Tweet Timeline Visualization</h1>
       
-      <div className="mb-4">
-        <label htmlFor="timezone" className="block text-sm font-medium text-gray-700">Timezone</label>
-        <select
-          id="timezone"
-          value={timezone}
-          onChange={handleTimezoneChange}
-          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-        >
-          <option value="UTC">UTC</option>
-          <option value="America/New_York">America/New_York</option>
-          <option value="Europe/London">Europe/London</option>
-          <option value="Asia/Tokyo">Asia/Tokyo</option>
-        </select>
-      </div>
+      <TimezoneSelector value={timezone} onChange={handleTimezoneChange} />
 
       {!hasPlot && (
         <div {...getRootProps()} className="bg-white shadow-lg rounded-lg p-6 mb-8 cursor-pointer border-2 border-dashed border-gray-300 hover:border-blue-500 transition duration-300">
