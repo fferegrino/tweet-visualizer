@@ -37,12 +37,18 @@ const FAQItem = ({ question, answer }) => {
 };
 
 const FAQ = () => {
+
+  const answer = <>
+  This is a visualization of your Twitter archive inspired by <a className='underline' target="_blank" href="https://www.economist.com/briefing/2024/11/21/elon-musks-transformation-in-his-own-words">this article by The Economist</a> and <a className='underline' target="_blank" href="https://bsky.app/profile/kjhealy.co/post/3lbisqovbxk2w">this <em>skeet</em> by Kieran Healy</a>.
+  </>
   return (
     <div className="mt-12 bg-white shadow-lg rounded-lg p-6">
       <h2 className="font-bold mb-4">Things you may want to know</h2>
+      <FAQItem question="What is this?" answer={answer} />  
       {faqData.map((item, index) => (
         <FAQItem key={index} question={item.question} answer={item.answer} />
       ))}
+      
     </div>
   );
 };

@@ -1,27 +1,32 @@
 import React from 'react';
 import TimezoneSelector from './TimezoneSelector';
 
-const ControlPanel = ({ timezone, onTimezoneChange, markerSize, onMarkerSizeChange }) => {
+const ControlPanel = ({ timezone, onTimezoneChange, markerSize, onMarkerSizeChange, onDownload, isDownloadEnabled }) => {
   return (
-    <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
-      <h2 className="text-xl font-bold mb-4">Control Panel</h2>
-      <div className="space-y-4">
-        <TimezoneSelector value={timezone} onChange={onTimezoneChange} />
-        
-        <div>
-          <label htmlFor="markerSize" className="block text-sm font-medium text-gray-700 mb-1">
-            Marker Size: {markerSize}
+    <div className="bg-white shadow rounded-lg pt-2 px-3 mb-2">
+      <div className="flex flex-wrap gap-4">
+        <div className="flex-1 min-w-[200px]">
+          <label htmlFor="timezone" className="block text-xs font-medium text-gray-700 mb-1">
+            Timezone
+          </label>
+          <TimezoneSelector value={timezone} onChange={onTimezoneChange} />
+        </div>
+        <div className="flex-1 min-w-[200px]">
+          <label htmlFor="markerSize" className="block text-xs font-medium text-gray-700 mb-1">
+            Marker Size
           </label>
           <input
-            type="range"
+            type="number"
             id="markerSize"
             min="1"
-            max="10"
+            max="5"
+            step="0.5"
             value={markerSize}
             onChange={(e) => onMarkerSizeChange(Number(e.target.value))}
-            className="w-full"
+            className="mt-1 block w-full py-1.5 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
+
       </div>
     </div>
   );

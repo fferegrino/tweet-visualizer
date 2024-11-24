@@ -13,7 +13,8 @@ function App() {
   const [plotData, setPlotData] = useState(null);
   const [rawData, setRawData] = useState(null);
   const [timezone, setTimezone] = useState('UTC');
-  const [markerSize, setMarkerSize] = useState(2);
+  const [markerSize, setMarkerSize] = useState(1);
+  const [plotHeight, setPlotHeight] = useState(500);
   const plotRef = useRef(null);
 
   const onDrop = useCallback((acceptedFiles) => {
@@ -30,7 +31,7 @@ function App() {
         const parsedData = JSON.parse(reader.result.slice(line));
         setRawData(parsedData);
         const processedData = processData(parsedData, timezone);
-        setPlotData(processedData);
+        setPlotData({...processedData, marker: {...processedData.marker, size: markerSize}});
         setHasPlot(true);
       } catch (error) {
         console.error('Error:', error);
@@ -115,16 +116,24 @@ function App() {
     }
   };
 
+  const handleDownload = async () => {
+    if (plotRef.current) {
+      const image = await Plotly.toImage(plotRef.current, {
+        format: 'png',
+        width: 1200,
+        height: plotHeight,
+        scale: 3
+      });
+      const a = document.createElement('a');
+      a.href = image;
+      a.download = 'tweet_timeline.png';
+      a.click();
+    }
+  };
+
   return (
     <div className="App bg-gray-100 min-h-screen p-8">
-      <h1 className="text-4xl font-bold text-center text-blue-600 mb-8">Tweet Timeline Visualization</h1>
-      
-      <ControlPanel 
-        timezone={timezone} 
-        onTimezoneChange={handleTimezoneChange}
-        markerSize={markerSize}
-        onMarkerSizeChange={handleMarkerSizeChange}
-      />
+      <h1 className="text-4xl font-bold text-center text-blue-600 mb-4">Tweet Timeline Visualization</h1>
 
       {!hasPlot && (
         <div {...getRootProps()} className="bg-white h-[300px] shadow-lg rounded-lg p-6 mb-8 cursor-pointer border-2 border-dashed border-gray-300 hover:border-blue-500 transition duration-300">
@@ -132,7 +141,7 @@ function App() {
           {
             isDragActive ?
               <p className="text-center text-lg text-blue-500">Drop the file here ...</p> :
-              <p className="text-center text-lg">Drag 'n' drop your JSON file here, or click to select file</p>
+              <p className="text-center text-lg">Drag 'n' drop your <span className='font-bold'>tweets.js</span> file here, or click to select file</p>
           }
         </div>
       )}
@@ -150,12 +159,39 @@ function App() {
         </div>
       )}
 
+
       {hasPlot && (
+        <>
+
+        <ControlPanel 
+          timezone={timezone} 
+          onTimezoneChange={handleTimezoneChange}
+          markerSize={markerSize}
+          onMarkerSizeChange={handleMarkerSizeChange}
+          isDownloadEnabled={hasPlot}
+          onDownload={handleDownload}
+        />
+
         <div className="bg-white shadow-lg rounded-lg p-6">
-          <div ref={plotRef} className="w-full h-[500px]"></div>
+          <div ref={plotRef} className={`w-full h-[${plotHeight}px]`}></div>
         </div>
+
+        <div className="flex-1 min-w-[200px] flex items-end mt-4">
+          <button
+            onClick={handleDownload}
+            disabled={!hasPlot}
+            className="w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          >
+            Download
+          </button>
+        </div>
+        </>
       )} 
 
+
+<div className="bg-blue-50 text-blue-700 px-4 py-2 text-xs rounded relative text-center mt-4" role="alert">
+         follow me <a target="_blank" href="https://bsky.app/profile/feregri.no" className="text-blue-700 underline">Bluesky @feregri.no</a> 
+        </div>
       <FAQ /> 
     </div>
   );
