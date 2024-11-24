@@ -3,6 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import Plotly from 'plotly.js-dist-min';
 import moment from 'moment-timezone';
 import TimezoneSelector from './TimezoneSelector';
+import ControlPanel from './ControlPanel';
 import FAQ from './FAQ';
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
   const [plotData, setPlotData] = useState(null);
   const [rawData, setRawData] = useState(null);
   const [timezone, setTimezone] = useState('UTC');
+  const [markerSize, setMarkerSize] = useState(2);
   const plotRef = useRef(null);
 
   const onDrop = useCallback((acceptedFiles) => {
@@ -56,7 +58,7 @@ function App() {
       mode: 'markers',
       type: 'scatter',
       marker: {
-        size: 2,
+        size: 1,
         color: '#ff0000'
       },
       hoverinfo: 'text+x+y'
@@ -68,12 +70,13 @@ function App() {
       const minutesToHighlight = [0, 6 * 60, 12 * 60, 18 * 60, 24 * 60 - 1];
       const textToHighlight = ['00:00', '06:00', '12:00', '18:00', '23:59'];
       const layout = {
-        title: {
-          text: `Tweet Timeline (${timezone})`,
-          font: {
-            size: 20,
-          },
-          y: 0.85
+
+  margin: {
+    l:100,
+    r: 100,
+    b: 50,
+    t: 30,
+          pad: 4
         },
         xaxis: { 
           tickfont: {
@@ -104,11 +107,24 @@ function App() {
     }
   };
 
+  const handleMarkerSizeChange = (newSize) => {
+    setMarkerSize(newSize);
+    if (rawData) {
+      const processedData = processData(rawData, timezone);
+      setPlotData({...processedData, marker: {...processedData.marker, size: newSize}});
+    }
+  };
+
   return (
     <div className="App bg-gray-100 min-h-screen p-8">
       <h1 className="text-4xl font-bold text-center text-blue-600 mb-8">Tweet Timeline Visualization</h1>
       
-      <TimezoneSelector value={timezone} onChange={handleTimezoneChange} />
+      <ControlPanel 
+        timezone={timezone} 
+        onTimezoneChange={handleTimezoneChange}
+        markerSize={markerSize}
+        onMarkerSizeChange={handleMarkerSizeChange}
+      />
 
       {!hasPlot && (
         <div {...getRootProps()} className="bg-white h-[300px] shadow-lg rounded-lg p-6 mb-8 cursor-pointer border-2 border-dashed border-gray-300 hover:border-blue-500 transition duration-300">
@@ -136,7 +152,7 @@ function App() {
 
       {hasPlot && (
         <div className="bg-white shadow-lg rounded-lg p-6">
-          <div ref={plotRef} className="w-full h-[600px]"></div>
+          <div ref={plotRef} className="w-full h-[500px]"></div>
         </div>
       )} 
 
