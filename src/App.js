@@ -3,6 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import Plotly from 'plotly.js-dist-min';
 import moment from 'moment-timezone';
 import TimezoneSelector from './TimezoneSelector';
+import FAQ from './FAQ';
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
@@ -110,7 +111,7 @@ function App() {
       <TimezoneSelector value={timezone} onChange={handleTimezoneChange} />
 
       {!hasPlot && (
-        <div {...getRootProps()} className="bg-white shadow-lg rounded-lg p-6 mb-8 cursor-pointer border-2 border-dashed border-gray-300 hover:border-blue-500 transition duration-300">
+        <div {...getRootProps()} className="bg-white h-[300px] shadow-lg rounded-lg p-6 mb-8 cursor-pointer border-2 border-dashed border-gray-300 hover:border-blue-500 transition duration-300">
           <input {...getInputProps()} />
           {
             isDragActive ?
@@ -138,6 +139,8 @@ function App() {
           <div ref={plotRef} className="w-full h-[600px]"></div>
         </div>
       )} 
+
+      <FAQ /> 
     </div>
   );
 }
