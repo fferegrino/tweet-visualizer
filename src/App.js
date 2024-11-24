@@ -72,11 +72,11 @@ function App() {
       const textToHighlight = ['00:00', '06:00', '12:00', '18:00', '23:59'];
       const layout = {
 
-  margin: {
-    l:100,
-    r: 100,
-    b: 50,
-    t: 30,
+        margin: {
+          l:100,
+          r: 100,
+          b: 50,
+          t: 30,
           pad: 4
         },
         xaxis: { 
@@ -93,10 +93,29 @@ function App() {
           side: 'right'
         },
         paper_bgcolor: 'hsl(51, 22%, 95%)',
-        plot_bgcolor: 'hsl(51, 22%, 95%)'
+        plot_bgcolor: 'hsl(51, 22%, 95%)',
+        annotations: [
+          {
+            xref: 'paper',
+            yref: 'paper',
+            x: 0,
+            xanchor: 'left',
+            y: 0,
+            yanchor: 'bottom',
+            text: 'https://tweet-visualizer.netlify.app/',
+            font: {
+              size: 15,
+              color: '#adadad'
+            },
+            showarrow: false
+          },
+          ]
       };
 
-      Plotly.newPlot(plotRef.current, [plotData], layout, {responsive: true, staticPlot: true});
+      Plotly.newPlot(plotRef.current, [plotData], layout, {
+        responsive: true, 
+        staticPlot: true,
+      });
     }
   }, [hasPlot, plotData, timezone]);
 
