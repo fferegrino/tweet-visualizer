@@ -152,9 +152,16 @@ function App() {
     }
   };
 
+  const titleClasses = ['font-bold', 'text-center', 'text-blue-600', 'mb-4'];
+  if (hasPlot) {
+    titleClasses.push('text-2xl');
+  } else {
+    titleClasses.push('text-4xl');
+  }
+
   return (
     <div className="App bg-gray-100 min-h-screen p-8">
-      <h1 className="text-4xl font-bold text-center text-blue-600 mb-4">Tweet Timeline Visualization</h1>
+      <h1 className={titleClasses.join(' ')}>Tweet Timeline Visualization</h1>
 
       {!hasPlot && (
         <div {...getRootProps()} className="bg-white h-[300px] shadow-lg rounded-lg p-6 mb-8 cursor-pointer border-2 border-dashed border-gray-300 hover:border-blue-500 transition duration-300">
