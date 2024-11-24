@@ -15,6 +15,7 @@ function App() {
   const [timezone, setTimezone] = useState('UTC');
   const [markerSize, setMarkerSize] = useState(1);
   const [plotHeight, setPlotHeight] = useState(500);
+  const [plotWidth, setPlotWidth] = useState(500);
   const plotRef = useRef(null);
 
   const onDrop = useCallback((acceptedFiles) => {
@@ -31,7 +32,7 @@ function App() {
         const parsedData = JSON.parse(reader.result.slice(line));
         setRawData(parsedData);
         const processedData = processData(parsedData, timezone);
-        setPlotData({...processedData, marker: {...processedData.marker, size: markerSize}});
+        setPlotData({ ...processedData, marker: { ...processedData.marker, size: markerSize } });
         setHasPlot(true);
       } catch (error) {
         console.error('Error:', error);
@@ -49,7 +50,7 @@ function App() {
   function processData(rawData, selectedTimezone) {
     const tweetData = rawData.map(item => item.tweet);
     const dates = tweetData.map(tweet => moment.tz(tweet.created_at, selectedTimezone));
-    
+
     const minutesOfDay = dates.map(date => date.hours() * 60 + date.minutes());
     const dateOnly = dates.map(date => date.format('YYYY-MM-DD'));
 
@@ -71,20 +72,21 @@ function App() {
       const minutesToHighlight = [0, 6 * 60, 12 * 60, 18 * 60, 24 * 60 - 1];
       const textToHighlight = ['00:00', '06:00', '12:00', '18:00', '23:59'];
       const layout = {
-
+        width: plotWidth,
+        height: plotHeight,
         margin: {
-          l:100,
-          r: 100,
+          l: 70,
+          r: 70,
           b: 50,
-          t: 30,
+          t: 50,
           pad: 4
         },
-        xaxis: { 
+        xaxis: {
           tickfont: {
             size: 15
           },
         },
-        yaxis: { 
+        yaxis: {
           tickvals: minutesToHighlight,
           ticktext: textToHighlight,
           tickfont: {
@@ -104,16 +106,16 @@ function App() {
             yanchor: 'bottom',
             text: 'https://tweet-visualizer.netlify.app/',
             font: {
-              size: 15,
+              size: 10,
               color: '#adadad'
             },
             showarrow: false
           },
-          ]
+        ]
       };
 
       Plotly.newPlot(plotRef.current, [plotData], layout, {
-        responsive: true, 
+        responsive: true,
         staticPlot: true,
       });
     }
@@ -131,7 +133,7 @@ function App() {
     setMarkerSize(newSize);
     if (rawData) {
       const processedData = processData(rawData, timezone);
-      setPlotData({...processedData, marker: {...processedData.marker, size: newSize}});
+      setPlotData({ ...processedData, marker: { ...processedData.marker, size: newSize } });
     }
   };
 
@@ -139,7 +141,7 @@ function App() {
     if (plotRef.current) {
       const image = await Plotly.toImage(plotRef.current, {
         format: 'png',
-        width: 1200,
+        width: plotWidth,
         height: plotHeight,
         scale: 3
       });
@@ -170,7 +172,7 @@ function App() {
           <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       )}
-      
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
           <strong className="font-bold">Error:</strong>
@@ -178,40 +180,38 @@ function App() {
         </div>
       )}
 
-
       {hasPlot && (
         <>
 
-        <ControlPanel 
-          timezone={timezone} 
-          onTimezoneChange={handleTimezoneChange}
-          markerSize={markerSize}
-          onMarkerSizeChange={handleMarkerSizeChange}
-          isDownloadEnabled={hasPlot}
-          onDownload={handleDownload}
-        />
+          <ControlPanel
+            timezone={timezone}
+            onTimezoneChange={handleTimezoneChange}
+            markerSize={markerSize}
+            onMarkerSizeChange={handleMarkerSizeChange}
+            isDownloadEnabled={hasPlot}
+            onDownload={handleDownload}
+          />
 
-        <div className="bg-white shadow-lg rounded-lg p-6">
-          <div ref={plotRef} className={`w-full h-[${plotHeight}px]`}></div>
-        </div>
+          <div className={`flex justify-center bg-white w-[${plotWidth}px] shadow-lg rounded-lg p-6`}>
+            <div ref={plotRef} className={`flex justify-center w-full h-[${plotHeight}px]`}></div>
+          </div>
 
-        <div className="flex-1 min-w-[200px] flex items-end mt-4">
-          <button
-            onClick={handleDownload}
-            disabled={!hasPlot}
-            className="w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-          >
-            Download
-          </button>
-        </div>
+          <div className="flex-1 min-w-[200px] flex items-end mt-4">
+            <button
+              onClick={handleDownload}
+              disabled={!hasPlot}
+              className="w-full py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            >
+              Download
+            </button>
+          </div>
         </>
-      )} 
+      )}
 
-
-<div className="bg-blue-50 text-blue-700 px-4 py-2 text-xs rounded relative text-center mt-4" role="alert">
-         follow me <a target="_blank" href="https://bsky.app/profile/feregri.no" className="text-blue-700 underline">Bluesky @feregri.no</a> 
-        </div>
-      <FAQ /> 
+      <div className="bg-blue-50 text-blue-700 px-4 py-2 text-xs rounded relative text-center mt-4" role="alert">
+        follow me <a target="_blank" href="https://bsky.app/profile/feregri.no" className="text-blue-700 underline">Bluesky @feregri.no</a>
+      </div>
+      <FAQ />
     </div>
   );
 }
