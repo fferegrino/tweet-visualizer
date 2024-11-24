@@ -7,7 +7,7 @@ const faqData = [
   },
   {
     question: "Am I giving my Twitter archive to you?",
-    answer: "No, you are giving your Twitter archive to me. I literally don't care about your data. And your data never leaves your computer anyway."
+    answer: "No, you are NOT giving your Twitter archive to me. I really don't care about your data. And your data never leaves your computer anyway."
   },
   {
     question: "Do I need to select a timezone?",
