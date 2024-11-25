@@ -2,7 +2,6 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import Plotly from 'plotly.js-dist-min';
 import moment from 'moment-timezone';
-import TimezoneSelector from './TimezoneSelector';
 import ControlPanel from './ControlPanel';
 import FAQ from './FAQ';
 
@@ -10,7 +9,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [hasPlot, setHasPlot] = useState(false);
-  const [plotData, setPlotData] = useState(null);
+  const [tweetTimes, setTweetTimes] = useState(null);
   const [rawData, setRawData] = useState(null);
   const [timezone, setTimezone] = useState('UTC');
   const [markerSize, setMarkerSize] = useState(1);
@@ -32,7 +31,7 @@ function App() {
         const parsedData = JSON.parse(reader.result.slice(line));
         setRawData(parsedData);
         const processedData = processData(parsedData, timezone);
-        setPlotData({ ...processedData, marker: { ...processedData.marker, size: markerSize } });
+        setTweetTimes(processedData);
         setHasPlot(true);
       } catch (error) {
         console.error('Error:', error);
@@ -50,25 +49,27 @@ function App() {
   function processData(rawData, selectedTimezone) {
     const tweetData = rawData.map(item => item.tweet);
     const dates = tweetData.map(tweet => moment.tz(tweet.created_at, selectedTimezone));
-
-    const minutesOfDay = dates.map(date => date.hours() * 60 + date.minutes());
-    const dateOnly = dates.map(date => date.format('YYYY-MM-DD'));
-
-    return {
-      x: dateOnly,
-      y: minutesOfDay,
-      mode: 'markers',
-      type: 'scatter',
-      marker: {
-        size: 1,
-        color: '#ff0000'
-      },
-      hoverinfo: 'text+x+y'
-    };
+    return dates;
   }
 
   useEffect(() => {
-    if (hasPlot && plotData && plotRef.current) {
+    if (hasPlot && tweetTimes && plotRef.current) {
+
+      const minutesOfDay = tweetTimes.map(date => date.hours() * 60 + date.minutes());
+      const dateOnly = tweetTimes.map(date => date.format('YYYY-MM-DD'));
+
+      const thing  = {
+        x: dateOnly,
+        y: minutesOfDay,
+        mode: 'markers',
+        type: 'scatter',
+        marker: {
+          size: markerSize,
+          color: '#ff0000'
+        },
+        hoverinfo: 'text+x+y'
+      };
+
       const minutesToHighlight = [0, 6 * 60, 12 * 60, 18 * 60, 24 * 60 - 1];
       const textToHighlight = ['00:00', '06:00', '12:00', '18:00', '23:59'];
       const layout = {
@@ -114,18 +115,18 @@ function App() {
         ]
       };
 
-      Plotly.newPlot(plotRef.current, [plotData], layout, {
+      Plotly.newPlot(plotRef.current, [thing], layout, {
         responsive: true,
         staticPlot: true,
       });
     }
-  }, [hasPlot, plotData, timezone]);
+  }, [hasPlot, tweetTimes, timezone, markerSize, plotWidth, plotHeight]);
 
   const handleTimezoneChange = (newTimezone) => {
     setTimezone(newTimezone);
     if (rawData) {
       const processedData = processData(rawData, newTimezone);
-      setPlotData(processedData);
+      setTweetTimes(processedData);
     }
   };
 
@@ -133,7 +134,7 @@ function App() {
     setMarkerSize(newSize);
     if (rawData) {
       const processedData = processData(rawData, timezone);
-      setPlotData({ ...processedData, marker: { ...processedData.marker, size: newSize } });
+      setTweetTimes(processedData);
     }
   };
 
