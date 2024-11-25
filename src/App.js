@@ -1,9 +1,10 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import Plotly from 'plotly.js-dist-min';
 import moment from 'moment-timezone';
 import ControlPanel from './ControlPanel';
 import FAQ from './FAQ';
+import Plotly from 'plotly.js-dist-min';
+import TheEconomist from './plots/TheEconomist';
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,7 +16,6 @@ function App() {
   const [markerSize, setMarkerSize] = useState(1);
   const [plotHeight, setPlotHeight] = useState(500);
   const [plotWidth, setPlotWidth] = useState(500);
-  const plotRef = useRef(null);
 
   const onDrop = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
@@ -52,76 +52,6 @@ function App() {
     return dates;
   }
 
-  useEffect(() => {
-    if (hasPlot && tweetTimes && plotRef.current) {
-
-      const minutesOfDay = tweetTimes.map(date => date.hours() * 60 + date.minutes());
-      const dateOnly = tweetTimes.map(date => date.format('YYYY-MM-DD'));
-
-      const thing  = {
-        x: dateOnly,
-        y: minutesOfDay,
-        mode: 'markers',
-        type: 'scatter',
-        marker: {
-          size: markerSize,
-          color: '#ff0000'
-        },
-        hoverinfo: 'text+x+y'
-      };
-
-      const minutesToHighlight = [0, 6 * 60, 12 * 60, 18 * 60, 24 * 60 - 1];
-      const textToHighlight = ['00:00', '06:00', '12:00', '18:00', '23:59'];
-      const layout = {
-        width: plotWidth,
-        height: plotHeight,
-        margin: {
-          l: 70,
-          r: 70,
-          b: 50,
-          t: 50,
-          pad: 4
-        },
-        xaxis: {
-          tickfont: {
-            size: 15
-          },
-        },
-        yaxis: {
-          tickvals: minutesToHighlight,
-          ticktext: textToHighlight,
-          tickfont: {
-            size: 15
-          },
-          side: 'right'
-        },
-        paper_bgcolor: 'hsl(51, 22%, 95%)',
-        plot_bgcolor: 'hsl(51, 22%, 95%)',
-        annotations: [
-          {
-            xref: 'paper',
-            yref: 'paper',
-            x: 0,
-            xanchor: 'left',
-            y: 0,
-            yanchor: 'bottom',
-            text: 'https://tweet-visualizer.netlify.app/',
-            font: {
-              size: 10,
-              color: '#adadad'
-            },
-            showarrow: false
-          },
-        ]
-      };
-
-      Plotly.newPlot(plotRef.current, [thing], layout, {
-        responsive: true,
-        staticPlot: true,
-      });
-    }
-  }, [hasPlot, tweetTimes, timezone, markerSize, plotWidth, plotHeight]);
-
   const handleTimezoneChange = (newTimezone) => {
     setTimezone(newTimezone);
     if (rawData) {
@@ -139,8 +69,9 @@ function App() {
   };
 
   const handleDownload = async () => {
-    if (plotRef.current) {
-      const image = await Plotly.toImage(plotRef.current, {
+    const plotElement = document.querySelector('[data-js="plot"]');
+    if (plotElement) {
+      const image = await Plotly.toImage(plotElement, {
         format: 'png',
         width: plotWidth,
         height: plotHeight,
@@ -190,7 +121,6 @@ function App() {
 
       {hasPlot && (
         <>
-
           <ControlPanel
             timezone={timezone}
             onTimezoneChange={handleTimezoneChange}
@@ -200,9 +130,12 @@ function App() {
             onDownload={handleDownload}
           />
 
-          <div className={`flex justify-center bg-white w-[${plotWidth}px] shadow-lg rounded-lg p-6`}>
-            <div ref={plotRef} className={`flex justify-center w-full h-[${plotHeight}px]`}></div>
-          </div>
+          <TheEconomist
+            tweetTimes={tweetTimes}
+            markerSize={markerSize}
+            plotWidth={plotWidth}
+            plotHeight={plotHeight}
+          />
 
           <div className="flex-1 min-w-[200px] flex items-end mt-4">
             <button
