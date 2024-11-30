@@ -9,27 +9,46 @@ function GitHub({ tweetTimes, markerSize, plotWidth, plotHeight, timeZone }) {
       const now = new Date();
       // Get the last day of the week
       const lastDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (6 - now.getDay()));
-      const oneYearAgo = new Date(lastDay.getFullYear()-1, lastDay.getMonth(), lastDay.getDate());
+      const oneYearAgo = new Date(lastDay.getFullYear() - 1, lastDay.getMonth(), lastDay.getDate());
       const lastDayOneYearAgo = new Date(oneYearAgo.getFullYear(), oneYearAgo.getMonth(), oneYearAgo.getDate() + (6 - oneYearAgo.getDay()));
       const firstDayOneYearAgo = new Date(oneYearAgo.getFullYear(), oneYearAgo.getMonth(), oneYearAgo.getDate() - oneYearAgo.getDay() - 1);
       const weeksBetween = Math.floor((lastDay - lastDayOneYearAgo) / (7 * 24 * 60 * 60 * 1000));
       const daysOfYear = Array.from({ length: 7 }, () => Array.from({ length: weeksBetween }, () => 0));
+      const daysOfYearLabels = Array.from({ length: 7 }, () => Array.from({ length: weeksBetween }, () => ''));
 
-
-      const periodInMinutes = 60;
-      const minutesInDay = 24 * 60;
-      const periodCount = minutesInDay / periodInMinutes;
+      const day = 24 * 60 * 60 * 1000;
+      const week = 7 * day;
 
       for (const date of tweetTimes) {
         const dt = new Date(date);
-        const dayOfWeek= dt.getDay();
-        const weekOfYear = Math.floor((dt - firstDayOneYearAgo) / (7 * 24 * 60 * 60 * 1000)) - 1;
+        const dayOfWeek = dt.getDay();
+        const weekOfYear = Math.floor((dt - lastDayOneYearAgo - day) / week);
         daysOfYear[dayOfWeek][weekOfYear]++;
+      }
 
+      for (let i = 0; i < 7; i++) {
+        for (let j = 0; j < weeksBetween; j++) {
+          const date = new Date(firstDayOneYearAgo.getTime() + (i+ 1) * day + (j + 1) * week);
+          const contributions = daysOfYear[i][j];
+          daysOfYearLabels[i][j] = `${contributions} contributions on ${date}`;
+        }
+      }
+
+      const alreadyExistingMonths = new Set();
+      const labels = [];
+      for (let i = 1; i < weeksBetween + 1; i++) {
+        const dt = new Date(lastDayOneYearAgo);
+        dt.setDate(dt.getDate() + i * 7);
+        if (!alreadyExistingMonths.has(dt.getMonth())) {
+          alreadyExistingMonths.add(dt.getMonth());
+          labels.push(dt.toLocaleDateString('en-US', { month: 'short' }));
+        }
+        else {
+          labels.push('');
+        }
       }
 
       const daysAsStrings = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      const periods = Array.from({ length: periodCount }, (_, i) => i);
 
       const layout = {
         xaxis: {
@@ -37,7 +56,10 @@ function GitHub({ tweetTimes, markerSize, plotWidth, plotHeight, timeZone }) {
           zeroline: false,
           showline: false,
           ticks: '',
+          tickvals: Array.from({ length: weeksBetween + 1 }, (_, i) => i),
+          ticktext: labels,
           scaleanchor: 'y',
+          side: 'top'
         },
         yaxis: {
           range: [-0.5, 6.5],
@@ -49,17 +71,24 @@ function GitHub({ tweetTimes, markerSize, plotWidth, plotHeight, timeZone }) {
           ticks: '',
         },
         width: plotWidth,
+        height: plotHeight,
       };
-      
+
       var data = [
         {
           z: daysOfYear,
+          text: daysOfYearLabels,
           type: 'heatmap',
+          hoverinfo: 'text',
           xgap: 3,
           ygap: 3,
           colorscale: [
-            [0, 'rgba(0, 0, 0, 0.3)'],
-            [1.0, 'rgba(145, 47, 192, 1)']
+            [0, '#ebedf0'],
+            [0.20, '#9be9a8'],
+            [0.40, '#40c463'],
+            [0.60, '#30a14e'],
+            [0.80, '#216e39'],
+            [1.0, '#216e39'],
           ],
           showscale: false,
         }
