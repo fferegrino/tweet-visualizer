@@ -135,6 +135,7 @@ function App() {
             markerSize={markerSize}
             plotWidth={plotWidth}
             plotHeight={plotHeight}
+            timeZone={timezone}
           />
 
           <div className="flex-1 min-w-[200px] flex items-end mt-4">

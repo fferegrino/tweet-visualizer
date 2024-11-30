@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import Plotly from 'plotly.js-dist-min';
 
-function TheEconomist({ tweetTimes, markerSize, plotWidth, plotHeight }) {
+function TheEconomist({ tweetTimes, markerSize, plotWidth, plotHeight, timeZone }) {
   const plotRef = useRef(null);
 
   useEffect(() => {
@@ -71,7 +71,7 @@ function TheEconomist({ tweetTimes, markerSize, plotWidth, plotHeight }) {
         staticPlot: true,
       });
     }
-  }, [tweetTimes, markerSize, plotWidth, plotHeight]);
+  }, [tweetTimes, markerSize, plotWidth, plotHeight, timeZone]);
 
   return (
     <div className={`flex justify-center bg-white w-[${plotWidth}px] shadow-lg rounded-lg p-6`}>
