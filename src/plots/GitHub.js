@@ -30,7 +30,9 @@ function GitHub({ tweetTimes, markerSize, plotWidth, plotHeight, timeZone }) {
         for (let j = 0; j < weeksBetween; j++) {
           const date = new Date(firstDayOneYearAgo.getTime() + (i+ 1) * day + (j + 1) * week);
           const contributions = daysOfYear[i][j];
-          daysOfYearLabels[i][j] = `${contributions} contributions on ${date}`;
+          const formattedDate = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+          const stOrnd = contributions === 1 ? 'contribution' : 'contributions';  
+          daysOfYearLabels[i][j] = `${contributions} ${stOrnd} on ${formattedDate}`;
         }
       }
 
@@ -39,8 +41,8 @@ function GitHub({ tweetTimes, markerSize, plotWidth, plotHeight, timeZone }) {
       for (let i = 1; i < weeksBetween + 1; i++) {
         const dt = new Date(lastDayOneYearAgo);
         dt.setDate(dt.getDate() + i * 7);
-        if (!alreadyExistingMonths.has(dt.getMonth())) {
-          alreadyExistingMonths.add(dt.getMonth());
+        if (!alreadyExistingMonths.has(`${dt.getMonth()}-${dt.getFullYear()}`)) {
+          alreadyExistingMonths.add(`${dt.getMonth()}-${dt.getFullYear()}`);
           labels.push(dt.toLocaleDateString('en-US', { month: 'short' }));
         }
         else {
@@ -48,15 +50,19 @@ function GitHub({ tweetTimes, markerSize, plotWidth, plotHeight, timeZone }) {
         }
       }
 
-      const daysAsStrings = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const daysAsStrings = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
+
+      const sizeRatio = 1 / (weeksBetween / 7);
+      
 
       const layout = {
         xaxis: {
+          range: [0, weeksBetween + 1],
           showgrid: false,
           zeroline: false,
           showline: false,
           ticks: '',
-          tickvals: Array.from({ length: weeksBetween + 1 }, (_, i) => i),
+          tickvals: Array.from({ length: weeksBetween }, (_, i) => i),
           ticktext: labels,
           scaleanchor: 'y',
           side: 'top'
@@ -71,7 +77,7 @@ function GitHub({ tweetTimes, markerSize, plotWidth, plotHeight, timeZone }) {
           ticks: '',
         },
         width: plotWidth,
-        height: plotHeight,
+        height: plotWidth * sizeRatio + 150,
       };
 
       var data = [
@@ -80,8 +86,8 @@ function GitHub({ tweetTimes, markerSize, plotWidth, plotHeight, timeZone }) {
           text: daysOfYearLabels,
           type: 'heatmap',
           hoverinfo: 'text',
-          xgap: 3,
-          ygap: 3,
+          xgap: 5,
+          ygap: 5,
           colorscale: [
             [0, '#ebedf0'],
             [0.20, '#9be9a8'],
